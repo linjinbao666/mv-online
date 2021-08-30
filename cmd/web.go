@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"mv-online/pkg"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
@@ -13,7 +14,7 @@ import (
 //go:embed templates/*
 var f embed.FS
 
-func startWeb() {
+func startWeb(addr string) {
 	router := gin.Default()
 	templ := template.Must(template.New("").ParseFS(f, "templates/*.tmpl"))
 	router.SetHTMLTemplate(templ)
@@ -34,34 +35,30 @@ func startWeb() {
 	})
 
 	router.Static("/static/video", "./videos")
-	router.Run()
+	router.Run(addr)
 }
+
+var port int
+var workingDir string
 
 // webCmd represents the web command
 var webCmd = &cobra.Command{
 	Use:   "web",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "启动web服务",
+	Long:  `启动web服务`,
 	Run: func(cmd *cobra.Command, args []string) {
-		startWeb()
+		addr := ":" + strconv.Itoa(port)
+		startWeb(addr)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(webCmd)
 
-	// Here you will define your flags and configuration settings.
+	webCmd.Flags().IntVarP(&port, "port", "p", 8080, "--port=8080")
+	webCmd.MarkFlagRequired("port")
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// webCmd.PersistentFlags().String("foo", "", "A help for foo")
+	webCmd.Flags().StringVarP(&workingDir, "data", "", "/opt/mv-online", "--data=/opt/mv-online")
+	webCmd.MarkFlagRequired("data")
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// webCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
