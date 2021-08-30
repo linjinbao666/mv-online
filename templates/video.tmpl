@@ -16,11 +16,11 @@
 	<div class="layui-row">
 		<h2>{{ .title }}</h2>
 		<div class="layui-col-md12">
-			<table id="videos" lay-even lay-skin="line" lay-size="lg"></table>
+			<table id="videos" lay-even lay-skin="line" lay-size="lg" lay-filter="videos"></table>
 			<script type="text/html" id="bar">
-			<a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看视频</a>
-			<a class="layui-btn layui-btn-xs" lay-event="edit">编辑视频</a>
-			<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+			<a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">播放</a>
+			<a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+			<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="download">下载</a>
 			</script>
 		</div>
   	</div>
@@ -32,7 +32,7 @@ layui.use('table', function(){
   var table = layui.table;
   table.render({
     elem: '#videos'
-    ,url: '/api/video'
+    ,url: '/api/video/list'
 	,cellMinWidth: 80
     ,cols: [[
 	  {type:'checkbox'}
@@ -40,10 +40,45 @@ layui.use('table', function(){
       ,{field: 'name', title: '名称', align: 'center'}
       ,{field: 'size', title: '大小', sort: true, align: 'center'}
       ,{field: 'format', title: '格式', align: 'center'}
-	  ,{fixed: 'right', align:'center', toolbar: '#bar'}
+	  ,{field: 'source', title: '来源', align: 'center'}
+	  ,{fixed: 'right',title: '工具栏', align:'center', toolbar: '#bar'}
     ]]
   });
+  table.on('tool(videos)', function(obj){
+    var data = obj.data;
+    if(obj.event === 'detail'){
+      previewVideo("/static/video/"+data.name)
+    } else if(obj.event === 'download'){
+	  url = "/static/video/" + data.name
+      layer.confirm('下载确认', function(index){
+        downloadVideo(url)
+		layer.close(index);
+      });
+    } else if(obj.event === 'edit'){
+      layer.alert('编辑行：<br>'+ JSON.stringify(data))
+    }
+  });
 });
+
+function downloadVideo(url){
+	var downloadUrl = url
+	window.open(downloadUrl);
+}
+
+function previewVideo(url) {
+	var html = '<div class="wrap">';
+	html += '<video  height="500" controls autobuffer>';
+	html += '<source src="'+url+'" type="video/mp4" />';
+	html += '</video>';
+	html += '</div>';
+	layer.open({
+		type: 1,
+		offset: "auto",
+		skin: 'layui-layer-rim',
+		title: "视频预览",
+		content: html
+	});
+}
 </script>
 
 </html>

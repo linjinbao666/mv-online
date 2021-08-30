@@ -10,6 +10,7 @@ type Video struct {
 	Name   string `json:"name"`
 	Size   int64  `json:"size"`
 	Format string `json:"format"`
+	Source string `json:"source"`
 }
 
 func Videos(name string, format string, regex string) []Video {
@@ -26,6 +27,7 @@ func Videos(name string, format string, regex string) []Video {
 			Name:   path.Base(fileName),
 			Size:   file.Size(),
 			Format: path.Ext(file.Name()),
+			Source: "本地",
 		}
 		videos = append(videos, video)
 	}
