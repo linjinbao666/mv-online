@@ -1,15 +1,21 @@
 package main
 
 import (
+	"embed"
+	"html/template"
 	"mv-online/pkg"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
+//go:embed templates/*
+var f embed.FS
+
 func startWeb() {
 	router := gin.Default()
-	router.LoadHTMLGlob("templates/*")
+	templ := template.Must(template.New("").ParseFS(f, "templates/*.tmpl"))
+	router.SetHTMLTemplate(templ)
 	router.GET("/index", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.tmpl", gin.H{
 			"title": "首页",
