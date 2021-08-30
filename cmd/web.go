@@ -14,7 +14,7 @@ import (
 //go:embed templates/*
 var f embed.FS
 
-func startWeb(addr string) {
+func startWeb(addr string, workingDir string) {
 	router := gin.Default()
 	templ := template.Must(template.New("").ParseFS(f, "templates/*.tmpl"))
 	router.SetHTMLTemplate(templ)
@@ -29,7 +29,7 @@ func startWeb(addr string) {
 		})
 	})
 	router.GET("/api/video/list", func(c *gin.Context) {
-		videos := pkg.Videos("", "", "")
+		videos := pkg.Videos("", "", "", workingDir)
 		data := gin.H{"data": videos, "code": 0, "msg": "", "count": 10}
 		c.JSON(http.StatusOK, data)
 	})
@@ -41,14 +41,13 @@ func startWeb(addr string) {
 var port int
 var workingDir string
 
-// webCmd represents the web command
 var webCmd = &cobra.Command{
 	Use:   "web",
 	Short: "启动web服务",
 	Long:  `启动web服务`,
 	Run: func(cmd *cobra.Command, args []string) {
 		addr := ":" + strconv.Itoa(port)
-		startWeb(addr)
+		startWeb(addr, workingDir)
 	},
 }
 
@@ -58,7 +57,7 @@ func init() {
 	webCmd.Flags().IntVarP(&port, "port", "p", 8080, "--port=8080")
 	webCmd.MarkFlagRequired("port")
 
-	webCmd.Flags().StringVarP(&workingDir, "data", "", "/opt/mv-online", "--data=/opt/mv-online")
+	webCmd.Flags().StringVarP(&workingDir, "data", "", "", "--data=/opt/mv-online")
 	webCmd.MarkFlagRequired("data")
 
 }
