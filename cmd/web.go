@@ -34,7 +34,7 @@ func startWeb(addr string, workingDir string) {
 		c.JSON(http.StatusOK, data)
 	})
 
-	router.Static("/static/video", "./videos")
+	router.Static("/static/video", workingDir+"/videos")
 	router.Run(addr)
 }
 
