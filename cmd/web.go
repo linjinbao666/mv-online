@@ -34,6 +34,13 @@ func startWeb(addr string, workingDir string) {
 		c.JSON(http.StatusOK, data)
 	})
 
+	router.GET("/dashboard", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "dashboard.tmpl", gin.H{
+			"title": "面板",
+		})
+
+	})
+
 	router.Static("/static/video", workingDir+"/videos")
 	router.Run(addr)
 }
