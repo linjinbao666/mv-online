@@ -31,10 +31,11 @@
   </div>
 </script>
 <script>
-layui.use(['table', 'upload', 'element'], function(){
+layui.use(['table', 'upload', 'element', 'layer'], function(){
   var table = layui.table,
   upload = layui.upload,
-  element = layui.element;
+  element = layui.element,
+  layer = layui.layer;
   table.render({
     elem: '#videos'
     ,url: '/api/video/list'
@@ -46,7 +47,7 @@ layui.use(['table', 'upload', 'element'], function(){
 	  {type:'checkbox'}
       ,{field: 'id', title: '编号', sort: true, align: 'center'}
       ,{field: 'name', title: '名称', align: 'center'}
-      ,{field: 'size', title: '大小', sort: true, align: 'center'}
+      ,{field: 'size', title: '大小/MB', sort: true, align: 'center'}
       ,{field: 'format', title: '格式', align: 'center'}
 	  ,{field: 'source', title: '来源', align: 'center'}
 	  ,{fixed: 'right',title: '工具栏', align:'center', toolbar: '#bar'}
@@ -60,10 +61,6 @@ layui.use(['table', 'upload', 'element'], function(){
         var data = checkStatus.data;
         layer.alert(JSON.stringify(data));
       break;
-      case 'uploadVideo':
-        var data = checkStatus.data;
-        layer.msg('选中了：'+ data.length + ' 个');
-      break;
     };
   });
 
@@ -72,8 +69,9 @@ layui.use(['table', 'upload', 'element'], function(){
     if(obj.event === 'lock'){
       
     } else if(obj.event === 'del'){
-	  url = "/static/video/" + data.name
       layer.confirm('删除确认', function(index){
+        deleteVideo(data.name)
+        obj.del();
 		layer.close(index);
       });
     } else if(obj.event === 'edit'){
@@ -83,13 +81,32 @@ layui.use(['table', 'upload', 'element'], function(){
 
   upload.render({
     elem: '#uploadVideo'
-    ,url: ''
-    ,accept: 'video' 
+    ,url: '/upload'
+    ,accept: 'file' 
+    ,exts: 'mp4|mp3|mkv'
     ,done: function(res){
-      layer.msg('上传成功');
+      layer.msg('上传成功'+res.data);
+      table.reload('videos')
     }
   });
 
 });
+
+function deleteVideo(name){
+	var url = "/api/video/" + name
+    var request = new XMLHttpRequest(); 
+    request.onreadystatechange = function () { 
+        if (request.readyState === 4) { 
+            if (request.status === 200) {
+                resJSON = JSON.parse(request.responseText)
+                return layer.msg('文件：' + resJSON.data + resJSON.msg);
+            } else {
+                return layer.msg(request.status);
+            }
+        }
+    }
+    request.open('DELETE', url);
+    request.send();
+}
 </script>
 </body>

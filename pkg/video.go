@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"io/ioutil"
+	"os"
 	"path"
 )
 
@@ -11,6 +12,14 @@ type Video struct {
 	Size   int64  `json:"size"`
 	Format string `json:"format"`
 	Source string `json:"source"`
+}
+
+func VideoDelete(name string, format string, regex string, workingDir string) (string, error) {
+	err := os.Remove(workingDir + "/videos/" + name)
+	if err != nil {
+		return "", err
+	}
+	return name, nil
 }
 
 func Videos(name string, format string, regex string, workingDir string) []Video {
@@ -25,7 +34,7 @@ func Videos(name string, format string, regex string, workingDir string) []Video
 		video := Video{
 			ID:     index,
 			Name:   path.Base(fileName),
-			Size:   file.Size(),
+			Size:   file.Size() >> 20,
 			Format: path.Ext(file.Name()),
 			Source: "本地",
 		}
