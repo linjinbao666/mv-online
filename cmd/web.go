@@ -34,6 +34,34 @@ func startWeb(addr string, workingDir string) {
 		c.JSON(http.StatusOK, data)
 	})
 
+	router.DELETE("/api/video/:name", func(c *gin.Context) {
+		name := c.Param("name")
+		_, err := pkg.VideoDelete(name, "", "", workingDir)
+		if err != nil {
+			data := gin.H{"data": name, "code": -1, "msg": "删除失败" + err.Error()}
+			c.JSON(http.StatusOK, data)
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"data": name, "code": 0, "msg": "删除成功！",
+		})
+	})
+
+	router.GET("/dashboard", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "dashboard.tmpl", gin.H{
+			"title": "面板",
+		})
+
+	})
+
+	router.MaxMultipartMemory = 8 << 20
+	router.POST("/upload", func(c *gin.Context) {
+		file, _ := c.FormFile("file")
+		var videoFolder = workingDir + "/videos"
+		c.SaveUploadedFile(file, videoFolder+"/"+file.Filename)
+		data := gin.H{"data": file.Filename, "code": 0, "msg": "上传成功"}
+		c.JSON(http.StatusOK, data)
+	})
+
 	router.Static("/static/video", workingDir+"/videos")
 	router.Run(addr)
 }
